@@ -1,0 +1,17 @@
+//Start blob visualizer ----------
+	/*		
+	gl::color(Color(1,1,1));
+	int bufL =  mPcmBuffer->getSampleCount();
+
+	float angleScale = (2 * M_PI) / bufL;
+	for (int i = 0; i < bufL; i++)
+	{			
+		float data = audioBuffer->mData[i];
+		float perl = abs(mPerlin.fBm(data))*10;
+		Vec2f cc = Vec2f(std::cosf(angleScale* i)*circleRadius+perl,std::sinf(angleScale* i)*circleRadius+perl);
+		cc += center;		
+		gl::color(Color(std::cos(data*2*M_PI),std::tan(data*2*M_PI),std::sin(data*2*M_PI)));
+		gl::drawSolidCircle(cc,25*data);
+		//gl::drawLine(center,cc);
+	}*/
+	//End blob visualizer -------------
