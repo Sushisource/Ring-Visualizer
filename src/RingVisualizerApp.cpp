@@ -1,37 +1,22 @@
-#include "cinder/app/AppBasic.h"
-#include "cinder/audio/Io.h"
-#include "cinder/audio/Input.h"
-#include "cinder/audio/Output.h"
-#include "cinder/audio/PcmBuffer.h"
-#include "cinder/Perlin.h"
-#include "Kiss.h"
-
-using namespace ci;
-using namespace ci::app;
-
-class RingVisualizerApp : public AppBasic {
-  public:
-	  void prepareSettings(Settings *settings);
-	void setup();
-	void mouseDown( MouseEvent event );	
-	void update();
-	void draw();	
-private:
-	float circleRadius; //Circle radius in pixels
-	audio::TrackRef mTrack;
-	audio::PcmBuffer32fRef mPcmBuffer;
-	audio::PcmBuffer32fRef lastBuffer;
-	//fft
-	bool fftinit;
-	Kiss kfft;
-};
+#include "RingVisualizerApp.h"
 
 void RingVisualizerApp::setup()
 {
-	mTrack = audio::Output::addTrack( audio::load("M:\Temp2.mp3","mp3") );	
+	try
+	{
+		audio::SourceRef trk = audio::load("M:\\Music\\Lily Allen\\It's Not Me, It's You\\08 Lily Allen - Fuck You.mp3","mp3");
+		mTrack = audio::Output::addTrack( trk );	
+	}
+	catch(Exception e)
+	{
+		printf("Error %s", e.what());
+	}
 	//you must enable enable PCM buffering on the track to be able to call getPcmBuffer on it later
 	mTrack->enablePcmBuffering( true );
 	circleRadius = 200; 	
+
+	//Setup font
+	fnt = Font("Calibiri",15);
 
 	//make sure we don't use fft before it's ready
 	fftinit = false;
@@ -57,7 +42,7 @@ void RingVisualizerApp::update()
 		if (mPcmBuffer && mPcmBuffer->getInterleavedData())
 		{
 			// Get sample count
-			uint32_t mSampleCount = mPcmBuffer->getInterleavedData()->mSampleCount;
+			uint32_t mSampleCount = mPcmBuffer->getInterleavedData()->mSampleCount;			
 			// Now we want to make our doublebuffer out of this frame and last frame's data
 			// so we'll just copy the arrays next to each other
 			float *newData = mPcmBuffer->getInterleavedData()->mData;						
@@ -108,8 +93,11 @@ void RingVisualizerApp::draw()
 
 	// Iterate through data
 	gl::color(Color(1,1,1));
+	//Scale for how much we need to rotate b/w each data point, and a shift to rotate whole circle
 	const float angleScale = (2 * M_PI) / mDataSize;
-	const float angleShift = M_PI/2;
+	const float angleShift = M_PI;
+	//Average for note threshold
+	float avgIntensity = 0;
 	int alternate = 1;
 	for (int32_t i = 0; i < mDataSize; i++) 
 	{
@@ -122,13 +110,20 @@ void RingVisualizerApp::draw()
 		//If we want a circle, R should be intensity, and angle is x axis
 		float c = y * 2;
 		y+=circleRadius+y*circleRadius;
-		float theta = (angleScale* x*alternate+angleShift);
+		avgIntensity+=y;
+		float theta = ((angleScale* x*alternate+alternate*angleShift)-angleShift/2);
 		Vec2f fcenter= Vec2f(y * cosf(theta), y*sinf(theta));
 		fcenter += center;		
 		gl::color(Color(c,c*3,c));
-		gl::drawSolidCircle(fcenter,3);		
+		gl::drawSolidCircle(fcenter,3);			
 		alternate*=-1;
-	}		
+	}	
+	avgIntensity/=mDataSize;
+	gl::color(Color(.8,1,.8));
+	std::ostringstream s; 
+    s << avgIntensity; 
+	gl::drawString(s.str(),center,Color(1,1,1),fnt);
+	cinder::gl::drawStrokedCircle(center, avgIntensity);	
 }
 
 CINDER_APP_BASIC( RingVisualizerApp, RendererGl )
