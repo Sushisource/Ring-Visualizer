@@ -7,13 +7,16 @@
 #include "cinder/audio/Output.h"
 #include "cinder/audio/PcmBuffer.h"
 #include "cinder/Perlin.h"
+#include "NoteRay.h"
 #include "Kiss.h"
-
+#include <list>
+#define CIRCLE_RADIUS 180
+#define SKIP_LOW_F_BINS 15
 using namespace ci;
 using namespace ci::app;
 
 class RingVisualizerApp : public AppBasic {
-  public:
+ public:
 	void prepareSettings(Settings *settings);
 	void setup();
 	void mouseDown( MouseEvent event );	
@@ -28,6 +31,9 @@ private:
 	bool fftinit;
 	Kiss kfft;
 	Font fnt;
+	float noteThreshold;
+	//For keeping track of our note particle engine
+	std::list<NoteRay> notes;
+	bool* currentlyNote;
 };
-
 #endif
