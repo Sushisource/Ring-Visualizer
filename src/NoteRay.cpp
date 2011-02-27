@@ -1,10 +1,6 @@
 #include "NoteRay.h"
-#include "cinder/gl/gl.h"
-#include "cinder/Perlin.h"
-using namespace ci;
-Perlin perl(2);
 
-NoteRay::NoteRay(Vec2f iPos, Vec2f iVel, int indx)
+NoteRay::NoteRay(Vec2f iPos, Vec2f iVel, int indx, Perlin *p)
 {
 	//First we'll fill the trail with the initial position
 	for (int x=0; x < TRAIL_LENGTH; x++)
@@ -14,6 +10,7 @@ NoteRay::NoteRay(Vec2f iPos, Vec2f iVel, int indx)
 	age = 0;
 	isdead = false;
 	idx = indx;
+	perl = p;
 }
 
 void NoteRay::update()
@@ -27,7 +24,7 @@ void NoteRay::update()
 
 void NoteRay::nVel()
 {
-	vel += perl.dfBm(posAr[0])/100;
+	vel += perl->fBm(posAr[0])/(100/age);
 }
 
 void NoteRay::nPos()
@@ -55,25 +52,14 @@ void NoteRay::render()
 
 void NoteRay::renderTrail()
 {	
-	glBegin( GL_QUADS );
-	//Disired effect: increasing "pixelization"?
+	glBegin( GL_QUAD_STRIP );
 	bool on = true;
-	for( int i = 0; i < TRAIL_LENGTH - 2; i+=2 ) {
+	for( int i = 0; i < TRAIL_LENGTH; i++ ) {
 		if(on)
-		{
-			glColor4d(1,1,1,i/TRAIL_LENGTH);
+		{			
 			glVertex2f(posAr[i]+Vec2f(-TRAIL_WIDTH,-TRAIL_WIDTH));
 			glVertex2f(posAr[i]+Vec2f(TRAIL_WIDTH,TRAIL_WIDTH));
-			glVertex2f(posAr[i+1]+Vec2f(-TRAIL_WIDTH,-TRAIL_WIDTH));
-			glVertex2f(posAr[i+1]+Vec2f(TRAIL_WIDTH,TRAIL_WIDTH));
 		}
-		if(i%5==true)
-			on=!on;
 	}
 	glEnd();
-}
-
-
-NoteRay::~NoteRay(void)
-{
 }

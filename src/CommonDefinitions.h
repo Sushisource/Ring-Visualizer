@@ -1,1 +1,0 @@
-#define CIRCLE_RADIUS 180

@@ -1,5 +1,7 @@
 #pragma once
 #include "cinder/CinderResources.h"
-#include "Resources.h"
 
-//#define RES_MY_RES			CINDER_RESOURCE( ../resources/, image_name.png, 128, IMAGE )
+#define NOTERAY_V_SHADER	CINDER_RESOURCE( ../resources/, noterays_v.glsl, 128, GLSL )
+#define NOTERAY_SHADER		CINDER_RESOURCE( ../resources/, noterays.glsl, 129, GLSL )
+#define METABALL_V_SHADER	CINDER_RESOURCE( ../resources/, metaballs_v.glsl, 130, GLSL )
+#define METABALL_SHADER		CINDER_RESOURCE( ../resources/, metaballs.glsl, 131, GLSL )
