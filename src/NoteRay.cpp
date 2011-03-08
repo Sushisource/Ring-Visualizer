@@ -1,6 +1,6 @@
 #include "NoteRay.h"
 
-NoteRay::NoteRay(Vec2f iPos, Vec2f iVel, int indx, Perlin *p)
+NoteRay::NoteRay(Vec2f iPos, Vec2f iVel, int indx, Perlin *p, Vec2f unadjustedIpos)
 {
 	//First we'll fill the trail with the initial position
 	for (int x=0; x < TRAIL_LENGTH; x++)
@@ -11,6 +11,7 @@ NoteRay::NoteRay(Vec2f iPos, Vec2f iVel, int indx, Perlin *p)
 	isdead = false;
 	idx = indx;
 	perl = p;
+	initPos = unadjustedIpos;
 }
 
 void NoteRay::update()
@@ -24,7 +25,7 @@ void NoteRay::update()
 
 void NoteRay::nVel()
 {
-	vel += perl->fBm(posAr[0])/(100/age);
+	vel += perl->fBm(initPos)/(200/age);
 }
 
 void NoteRay::nPos()
@@ -35,6 +36,11 @@ void NoteRay::nPos()
 	}
 	// Set the initial location
 	posAr[0] += vel;
+}
+
+Vec2f NoteRay::curPos()
+{
+	return posAr[0];
 }
 
 void NoteRay::nAge()

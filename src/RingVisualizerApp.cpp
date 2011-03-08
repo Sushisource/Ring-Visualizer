@@ -15,14 +15,24 @@ void RingVisualizerApp::setup()
 	mTrack->enablePcmBuffering( true );*/
 	//Setup the fft
 	kfft.setDataSize(FFT_DATA_SIZ);
+	//Turn on some opengl stuff
+	//gl::enableAlphaBlending();
+	glClearColor( 0, 0, 0, 1 );
 	//Initalize stereo in
 	mCallbackID = mInput.addCallback<RingVisualizerApp>(&RingVisualizerApp::onData, this);
 	mInput.start();
-	//Setup ring module. Chop off last 300 bins filled with garbage
+	//Get fft bin size and Chop off last 300 bins filled with garbage
+	int binsiz = kfft.getBinSize()-300;
+	//Setup ring module.
 	//Load the shaders
 	gl::GlslProg n = gl::GlslProg(ci::app::loadResource(NOTERAY_V_SHADER),ci::app::loadResource( NOTERAY_SHADER ));
-	gl::GlslProg m = gl::GlslProg(ci::app::loadResource(METABALL_V_SHADER),ci::app::loadResource( METABALL_SHADER ));
-	ringM = new RingModule(kfft.getBinSize()-300,n,m);
+	//gl::GlslProg m = gl::GlslProg(ci::app::loadResource(METABALL_V_SHADER),ci::app::loadResource( METABALL_SHADER ));
+	ringM = new RingModule(binsiz,n);
+
+	//Setup sphere module
+	//Load shader
+	gl::GlslProg ss = gl::GlslProg(ci::app::loadResource(SPHERE_V_SHADER),ci::app::loadResource( SPHERE_SHADER ));
+	sphereM = new SphereModule(binsiz,ss);
 	fftinit=true;
 }
 
@@ -39,14 +49,19 @@ void RingVisualizerApp::update()
 
 void RingVisualizerApp::draw()
 {		
-	// clear out the window with black
-	glClearColor( 0, 0, 0, 0 );
+	// clear out the window with black	
 	glClear( GL_COLOR_BUFFER_BIT );
 	if( ! fftinit ) {
 		return;
 	}
+	//Get common params
+	Vec2f winCenter = getWindowCenter();
+	int w = getWindowWidth();
+	int h = getWindowHeight();
 	// Update Ring module
-	ringM->updateRing(mFreqData,getWindowCenter(),getWindowWidth(),getWindowHeight());
+	ringM->updateRing(mFreqData,winCenter,w,h);
+	//Update sphere
+	sphereM->updateSphere(mFreqData,winCenter,w,h);
 }
 
 // Called when audio in buffer is full

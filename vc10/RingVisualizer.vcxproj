@@ -110,6 +110,7 @@
     <ClCompile Include="..\src\NoteRay.cpp" />
     <ClCompile Include="..\src\RingModule.cpp" />
     <ClCompile Include="..\src\RingVisualizerApp.cpp" />
+    <ClCompile Include="..\src\SphereModule.cpp" />
     <ClCompile Include="E:\libs\cinder_0.8.2_vc2010\blocks\kiss\include\kiss\kiss_fft.c" />
     <ClCompile Include="E:\libs\cinder_0.8.2_vc2010\blocks\kiss\include\kiss\kiss_fftr.c" />
     <ClCompile Include="E:\libs\cinder_0.8.2_vc2010\blocks\kiss\src\Kiss.cpp" />
@@ -121,6 +122,7 @@
     <ClInclude Include="..\include\Resources.h" />
     <ClInclude Include="..\include\RingModule.h" />
     <ClInclude Include="..\include\RingVisualizerApp.h" />
+    <ClInclude Include="..\include\SphereModule.h" />
     <ClInclude Include="..\include\WavHeader.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

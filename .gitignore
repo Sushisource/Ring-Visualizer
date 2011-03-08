@@ -1,5 +1,10 @@
 #ignore thumbnails created by windows
 Thumbs.db
+#Vim Swapfiles
+*.swp
+#More VS crap
+vc10/ipch/*
+vc10/*05424
 #Ignore files build by Visual Studio
 *.obj
 *.exe

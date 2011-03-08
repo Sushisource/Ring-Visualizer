@@ -10,6 +10,7 @@
 #include "Kiss.h"
 #include "AudioInput.h"
 #include "RingModule.h"
+#include "SphereModule.h"
 #define FFT_DATA_SIZ BUFFER_LENGTH
 using namespace ci;
 using namespace ci::app;
@@ -36,6 +37,8 @@ private:
 	Kiss kfft;
 	//Ring portion of visualizer
 	RingModule *ringM;
+	//Sphere portion
+	SphereModule *sphereM;
 	//Just hiding away the audio and fft updates to make code nicer
 	void updateAudio();
 };
