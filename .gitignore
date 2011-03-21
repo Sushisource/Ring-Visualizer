@@ -5,6 +5,8 @@ Thumbs.db
 #More VS crap
 vc10/ipch/*
 vc10/*05424
+vc10/*.sdf
+*.*sdf
 #Ignore files build by Visual Studio
 *.obj
 *.exe

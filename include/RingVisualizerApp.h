@@ -23,7 +23,8 @@ class RingVisualizerApp : public AppBasic {
 	void setup();
 	void update();
 	void draw();
-private:
+
+ private:
 	float circleRadius; //Circle radius in pixels
 	//audio::TrackRef mTrack;
 	//audio::PcmBuffer32fRef mPcmBuffer;

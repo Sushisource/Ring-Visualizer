@@ -88,7 +88,7 @@ void RingVisualizerApp::draw()
 	sphereM->updateSphere(mFreqData,winCenter,w,h);
 	//Draw the background
 	bgsh.bind();
-	bgsh.uniform("permTexture",0); //tex unit 0
+	bgsh.uniform("permTexture",0); //tex unit 0?
 	gl::drawSolidRect(Rectf(0,0,w,h));
 	bgsh.unbind();
 }
