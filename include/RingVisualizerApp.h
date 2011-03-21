@@ -33,18 +33,17 @@ private:
 	//fft
 	bool fftinit;
 	float * mFreqData;
-	Kiss kfft;
+	Kiss kfft;	
+	gl::GlslProg bgsh; //Background shader
+	gl::Texture permTexture; //Texture array for permutation table
 	//Ring portion of visualizer
 	RingModule *ringM;
 	//Sphere portion
 	SphereModule *sphereM;
 	//Just hiding away the audio and fft updates to make code nicer
 	void updateAudio();
-	//Background shader
-	gl::GlslProg bgsh;
 	void onData(float * data, int32_t size); //Audio callback	
-	void initPermTexture(GLuint *texID); //Sets up lookup texture for noise
-	Vec4f *permTexture; //Texture array for permutation table
+	void initPermTexture(); //Sets up lookup texture for noise	
 	
 };
 #endif

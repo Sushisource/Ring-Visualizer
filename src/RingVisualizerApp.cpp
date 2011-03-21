@@ -55,7 +55,7 @@ void RingVisualizerApp::setup()
 	sphereM = new SphereModule(binsiz,ss);
 	//Our own BG shader
 	bgsh = gl::GlslProg(ci::app::loadResource(BG_V_SHADER), ci::app::loadResource( BG_SHADER ));
-	initPermTexture(&permTextureID);
+	initPermTexture();
 	fftinit=true;
 }
 
@@ -88,7 +88,7 @@ void RingVisualizerApp::draw()
 	sphereM->updateSphere(mFreqData,winCenter,w,h);
 	//Draw the background
 	bgsh.bind();
-	//bgsh.uniform("permTexture",
+	bgsh.uniform("permTexture",0); //tex unit 0
 	gl::drawSolidRect(Rectf(0,0,w,h));
 	bgsh.unbind();
 }
@@ -106,30 +106,23 @@ void RingVisualizerApp::onData(float * data, int32_t size)
  * initPermTexture() - create and load a 2D texture for
  * a combined index permutation and gradient lookup table.
  * This texture is used for 2D and 3D noise, both classic and simplex.
+ * It is 256 x 256 pixels
  */
-void initPermTexture()
-{
-  char *pixels;
-  
-  glGenTextures(1, texID); // Generate a unique texture ID
-  glBindTexture(GL_TEXTURE_2D, *texID); // Bind the texture to texture unit 0
-
-  pixels = (char*)malloc( 256*256*4 );
-  for(int i = 0; i<256; i++)
-    for(int j = 0; j<256; j++) 
-	{
-      int offset = (i*256+j)*4;
-      char value = perm[(j+perm[i]) & 0xFF];
-      pixels[offset] = grad3[value & 0x0F][0] * 64 + 64;   // Gradient x
-      pixels[offset+1] = grad3[value & 0x0F][1] * 64 + 64; // Gradient y
-      pixels[offset+2] = grad3[value & 0x0F][2] * 64 + 64; // Gradient z
-      pixels[offset+3] = value;                     // Permuted index
-    }
-  
-  // GLFW texture loading functions won't work here - we need GL_NEAREST lookup.
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+void RingVisualizerApp::initPermTexture()
+{	
+	unsigned char pixels[256*256*4];
+	for(int i = 0; i<256; i++)
+		for(int j = 0; j<256; j++) 
+		{
+			int offset = (i*256+j)*4;
+			char value = perm[(j+perm[i]) & 0xFF];
+			pixels[offset] = grad3[value & 0x0F][0] * 64 + 64;   // Gradient x
+			pixels[offset+1] = grad3[value & 0x0F][1] * 64 + 64; // Gradient y
+			pixels[offset+2] = grad3[value & 0x0F][2] * 64 + 64; // Gradient z
+			pixels[offset+3] = value;                     // Permuted index
+		}
+		permTexture = gl::Texture(pixels,GL_RGBA,256,256);
+		permTexture.bind(0);
 }
 
 /* Currently removed -- used as part of the
