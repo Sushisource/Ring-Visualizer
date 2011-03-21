@@ -1,6 +1,6 @@
 #include "RingModule.h"
 
-RingModule::RingModule(int dataSize, gl::GlslProg noteray)//, gl::GlslProg metaballs)
+RingModule::RingModule(int dataSize, gl::GlslProg noteray)
 {
 	//If this starts out low... kablooey
 	noteThreshold = 9000;
@@ -28,28 +28,15 @@ RingModule::~RingModule()
 void RingModule::updateRing(float *freqData, Vec2f center, int wWidth, int wHeight)
 {
 	glDisable(GL_LIGHTING);
+	perl.setSeed(clock());
 	// Get dimensions
 	float mScale = (wWidth - 20.0f) / (float)dataSiz;
 	float mWindowHeight = wHeight;	
 	//Average for note threshold
-	float avgIntensity = 0;
-	//Update noterays
-	fShader.bind();
-	fShader.uniform("lightpos",Vec3f(center,10.0f));
-	for(int i = 0; i < dataSiz; i++)
-	{
-		NoteRay *curr = currentlyNote[i];
-		if(curr == NULL) continue;
-		if (!curr->isdead)
-			curr->update();
-		else {
-			delete currentlyNote[i];
-			currentlyNote[i]=NULL;
-		}
-	}
-	fShader.unbind();
+	float avgIntensity = 0;	
 
 	bool alternate = true;
+	
 	for (int i = 0; i < dataSiz; i++) 
 	{
 		// Do logarithmic plotting for frequency domain
@@ -69,7 +56,7 @@ void RingModule::updateRing(float *freqData, Vec2f center, int wWidth, int wHeig
 		Vec2f fcenter= Vec2f(y * cosf(theta), y*sinf(theta));
 		Vec2f nRayPos = fcenter.limited(CIRCLE_RADIUS);
 		fcenter += center;		
-		gl::color(Color(c,c*3,c));
+		gl::color(ColorA(c,c*3,c,c*3));
 		//Note that although y my already be a note, it will be overwritten
 		if(y>noteThreshold && !(currentlyNote[i]!=NULL && currentlyNote[i]->age < 30))
 		{
@@ -78,12 +65,18 @@ void RingModule::updateRing(float *freqData, Vec2f center, int wWidth, int wHeig
 				delete currentlyNote[i]; //Some cleanup
 			currentlyNote[i]= new NoteRay(nRayPos+center,vel,i,&perl,nRayPos-center);
 		}
-		gl::drawSolidCircle(fcenter,3);
+		//gl::drawSolidCircle(fcenter,3);
 		alternate=!alternate;
 	}		
 	avgIntensity/=dataSiz-SKIP_LOW_F_BINS;
 	lastAverage = avgIntensity;
 	noteThreshold = avgIntensity+avgIntensity/9;
+	
+	//Update noterays
+	fShader.bind();
+	fShader.uniform("lightpos",Vec3f(center,10.0f));
+	noteRayUpdater(currentlyNote,dataSiz);
+	fShader.unbind();
 	
 	//Draw quad with metaballs
 	/** Currently unused for performance
@@ -93,4 +86,19 @@ void RingModule::updateRing(float *freqData, Vec2f center, int wWidth, int wHeig
 	gl::drawSolidRect(Rectf(0,0,wWidth,wHeight));	
 	mShader.unbind();
 	*/
+}
+
+void RingModule::noteRayUpdater(NoteRay **rays, int num)
+{
+	for(int i = 0; i < num; i++)
+	{
+		NoteRay *curr = rays[i];
+		if(curr == NULL) continue;
+		if (!curr->isdead)
+			curr->update();
+		else {
+			delete rays[i];
+			rays[i]=NULL;
+		}
+	}
 }

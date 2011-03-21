@@ -31,6 +31,8 @@ void main()
 	//Although this 5 should be a 6, 5 gives us better coloring
 	float theta = abs(radians)*(5/3.1415926f);
     float falloff = distance(gl_FragCoord.xy, lightpos.xy)-180;
-	vec4 col = thetaToRGB(theta,1,1)*clamp(log(falloff/30),0.0,1.0);
+    falloff = clamp(log(falloff/30),0.0,1.0);
+	vec4 col = thetaToRGB(theta,1,1)*falloff;
+    col.a = length(col.rgb); //Fade via saturation
 	gl_FragColor = col;
 }

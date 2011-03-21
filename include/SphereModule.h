@@ -1,6 +1,7 @@
 #include "cinder/gl/gl.h"
 #include "cinder/gl/GlslProg.h"
 #include "Resources.h"
+#include "cinder/Perlin.h"
 using namespace ci;
 
 class SphereModule
@@ -13,4 +14,5 @@ public:
 private:
 	int dataSiz; //Size of FFT array
 	gl::GlslProg shader; //Shader
+	Perlin perl;
 };

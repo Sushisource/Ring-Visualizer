@@ -24,10 +24,10 @@ private:
 	void nVel(); //velocity updater
 	void nPos(); //position updater (apply velocity)
 	void nAge(); //age updater
-	void render(); //render note
 	void renderTrail(); //render trail
-	Vec2f posAr[TRAIL_LENGTH]; //position array, note [0] is always current loc	
-	Vec2f initPos; //Initial position, referenced from origin	
+	Vec2f posAr[TRAIL_LENGTH]; //position array, note [0] is always current loc
+	Vec2f initPos; //Initial position, referenced from origin
 	Perlin *perl; //Perlin noise gen
+	void render(); //render note	
 };
 

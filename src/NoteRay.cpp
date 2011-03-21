@@ -18,14 +18,13 @@ void NoteRay::update()
 {
 	nVel();
 	nPos();
-	nAge();
+	nAge();	
 	render();
-	renderTrail();
 }
 
 void NoteRay::nVel()
 {
-	vel += perl->fBm(initPos)/(200/age);
+	vel += perl->dfBm(initPos)/5;
 }
 
 void NoteRay::nPos()
@@ -54,6 +53,7 @@ void NoteRay::render()
 {	
 	float rad = TRAIL_WIDTH * vel.lengthSquared()/2;
 	gl::drawSolidCircle(posAr[0],rad);
+	renderTrail();
 }
 
 void NoteRay::renderTrail()

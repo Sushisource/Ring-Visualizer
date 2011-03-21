@@ -7,6 +7,7 @@
 #include "cinder/audio/Output.h"
 #include "cinder/audio/PcmBuffer.h"
 #include "cinder/Perlin.h"
+#include "cinder/gl/Texture.h"
 #include "Kiss.h"
 #include "AudioInput.h"
 #include "RingModule.h"
@@ -24,12 +25,10 @@ class RingVisualizerApp : public AppBasic {
 	void draw();
 private:
 	float circleRadius; //Circle radius in pixels
-	audio::TrackRef mTrack;
-	audio::PcmBuffer32fRef mPcmBuffer;
-	audio::PcmBuffer32fRef lastBuffer;
-	//Stereo mix in stuff	
-	void onData(float * data, int32_t size); //Audio callback
-	int32_t mCallbackID; //Callback id
+	//audio::TrackRef mTrack;
+	//audio::PcmBuffer32fRef mPcmBuffer;
+	//audio::PcmBuffer32fRef lastBuffer;
+	int32_t mCallbackID; //Callback id for audio input
 	AudioInput mInput; //Audio input instance
 	//fft
 	bool fftinit;
@@ -41,5 +40,11 @@ private:
 	SphereModule *sphereM;
 	//Just hiding away the audio and fft updates to make code nicer
 	void updateAudio();
+	//Background shader
+	gl::GlslProg bgsh;
+	void onData(float * data, int32_t size); //Audio callback	
+	void initPermTexture(GLuint *texID); //Sets up lookup texture for noise
+	Vec4f *permTexture; //Texture array for permutation table
+	
 };
 #endif
