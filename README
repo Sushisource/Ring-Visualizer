@@ -1,1 +1,2 @@
-This project is really just an excuse for me to work on learning about signal processing.My goal is to eventually have a ring that fires off chunks according to the frequency of notes (harmonies) being played. We'll see how far I get.
+A visualizer written in C++ using the cinder library and GLSL.
+Still a work in progress.
