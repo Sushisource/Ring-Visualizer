@@ -98,7 +98,7 @@ float snoise(vec3 P) {
 void main()
 {
     //First fix the freqbalance
-    float fB = mix(10.0f,8.0f,freqBal);
+    float fB = mix(10.0f,9.0f,freqBal);
     float rC = freqBal;
     float bC = 1.0 - freqBal;
     vec3 ccolor = vec3(rC,.2,bC);
