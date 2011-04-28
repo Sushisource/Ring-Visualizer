@@ -26,6 +26,8 @@ class RingVisualizerApp : public AppBasic {
 
  private:
 	float circleRadius; //Circle radius in pixels
+	float elapsedTime; //Elapsed time
+	bool down;
 	//audio::TrackRef mTrack;
 	//audio::PcmBuffer32fRef mPcmBuffer;
 	//audio::PcmBuffer32fRef lastBuffer;
@@ -37,14 +39,15 @@ class RingVisualizerApp : public AppBasic {
 	Kiss kfft;	
 	gl::GlslProg bgsh; //Background shader
 	gl::Texture permTexture; //Texture array for permutation table
+	gl::Texture simplexTexture; //Texture array for 3d simplex noise
+	GLuint simplexTextureID;
 	//Ring portion of visualizer
 	RingModule *ringM;
 	//Sphere portion
 	SphereModule *sphereM;
 	//Just hiding away the audio and fft updates to make code nicer
 	void updateAudio();
-	void onData(float * data, int32_t size); //Audio callback	
+	void onData(float * data, int32_t size); //Audio callback
 	void initPermTexture(); //Sets up lookup texture for noise	
-	
 };
 #endif

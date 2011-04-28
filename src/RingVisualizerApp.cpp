@@ -20,6 +20,23 @@ int perm[256]= {151,160,137,91,90,15,
   49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
   138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180};
 
+unsigned char simplex4[][4] = {{0,64,128,192},{0,64,192,128},{0,0,0,0},
+  {0,128,192,64},{0,0,0,0},{0,0,0,0},{0,0,0,0},{64,128,192,0},
+  {0,128,64,192},{0,0,0,0},{0,192,64,128},{0,192,128,64},
+  {0,0,0,0},{0,0,0,0},{0,0,0,0},{64,192,128,0},
+  {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+  {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+  {64,128,0,192},{0,0,0,0},{64,192,0,128},{0,0,0,0},
+  {0,0,0,0},{0,0,0,0},{128,192,0,64},{128,192,64,0},
+  {64,0,128,192},{64,0,192,128},{0,0,0,0},{0,0,0,0},
+  {0,0,0,0},{128,0,192,64},{0,0,0,0},{128,64,192,0},
+  {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+  {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+  {128,0,64,192},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+  {192,0,64,128},{192,0,128,64},{0,0,0,0},{192,64,128,0},
+  {128,64,0,192},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+  {192,64,0,128},{0,0,0,0},{192,128,0,64},{192,128,64,0}};
+
 void RingVisualizerApp::setup()
 {
 	/* Old style song load
@@ -33,6 +50,7 @@ void RingVisualizerApp::setup()
 	}
 	//you must enable enable PCM buffering on the track to be able to call getPcmBuffer on it later
 	mTrack->enablePcmBuffering( true );*/
+	elapsedTime = 0;
 	//Setup the fft
 	kfft.setDataSize(FFT_DATA_SIZ);
 	//Turn on some opengl stuff
@@ -61,7 +79,7 @@ void RingVisualizerApp::setup()
 
 void RingVisualizerApp::prepareSettings( Settings *settings )
 {
-	settings->setWindowSize( 1400, 800 );
+	settings->setWindowSize( 1000, 700 );
 	settings->setFrameRate( 50.0f );
 }
 
@@ -80,16 +98,34 @@ void RingVisualizerApp::draw()
 	//Get common params
 	Vec2f winCenter = getWindowCenter();
 	int w = getWindowWidth();
-	int h = getWindowHeight();
-	
-	// Update Ring module
-	ringM->updateRing(mFreqData,winCenter,w,h);
+	int h = getWindowHeight();	
 	//Update sphere
 	sphereM->updateSphere(mFreqData,winCenter,w,h);
+	//Update Ring module
+	ringM->updateRing(mFreqData,winCenter,w,h);
 	//Draw the background
 	bgsh.bind();
-	bgsh.uniform("permTexture",0); //tex unit 0?
-	gl::drawSolidRect(Rectf(0,0,w,h));
+	//Update our animation track
+	elapsedTime += .01f;
+	bgsh.uniform("time", elapsedTime);
+	bgsh.uniform("permTexture",0); //tex unit 0
+	bgsh.uniform("simplexTexture",1); //tex unit 1
+	bgsh.uniform("wCenter",getWindowCenter());
+	//Calculate a weighted mean of the spectrogram
+	double sum = 0;
+	double wSum = 0;
+	for(int i = 0; i<FFT_DATA_SIZ; i++)
+	{
+		if(mFreqData[i] > 0)
+		{
+			sum += i*(mFreqData[i]);		
+			wSum += mFreqData[i];
+		}
+	}
+	sum /= wSum;
+	sum /= 213; //Now b/w 0 and 1. Mix occurs in GLSL
+	bgsh.uniform("freqBal",(float)sum);
+	gl::drawSolidRect(Rectf(0,0,w,h),true);
 	bgsh.unbind();
 }
 
@@ -101,13 +137,8 @@ void RingVisualizerApp::onData(float * data, int32_t size)
 	mFreqData = kfft.getAmplitude();
 }
 
-
-/*
- * initPermTexture() - create and load a 2D texture for
- * a combined index permutation and gradient lookup table.
- * This texture is used for 2D and 3D noise, both classic and simplex.
- * It is 256 x 256 pixels
- */
+//Loads up the textures that the background
+//shader needs for simplex noise
 void RingVisualizerApp::initPermTexture()
 {	
 	unsigned char pixels[256*256*4];
@@ -121,8 +152,17 @@ void RingVisualizerApp::initPermTexture()
 			pixels[offset+2] = grad3[value & 0x0F][2] * 64 + 64; // Gradient z
 			pixels[offset+3] = value;                     // Permuted index
 		}
-		permTexture = gl::Texture(pixels,GL_RGBA,256,256);
-		permTexture.bind(0);
+	permTexture = gl::Texture(pixels,GL_RGBA,256,256);
+	permTexture.bind(0); //Bind to texunit 0
+	//Now setup the simplex 1d texture
+	glActiveTexture(GL_TEXTURE1); // Activate a different texture unit (unit 1)
+	glGenTextures(1, &simplexTextureID); // Generate a unique texture ID
+	glBindTexture(GL_TEXTURE_1D, simplexTextureID); // Bind the texture to texture unit 1
+	// GLFW texture loading functions won't work here - we need GL_NEAREST lookup.
+	glTexImage1D( GL_TEXTURE_1D, 0, GL_RGBA, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, simplex4 );
+	glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+	glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+	//glActiveTexture(GL_TEXTURE0); // Switch active texture unit back to 0 again
 }
 
 /* Currently removed -- used as part of the

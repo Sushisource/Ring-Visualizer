@@ -13,8 +13,8 @@ RingModule::RingModule(int dataSize, gl::GlslProg noteray)
 	fShader = noteray;
 	//mShader = metaballs;
 	//Setup polar conversion consts
-	angleShift = 3*M_PI/2;
-	angleScale = (M_PI) / dataSiz;
+	angleShift = (float)(3*M_PI/2);
+	angleScale = (float)((M_PI) / dataSiz);
 	perl = ci::Perlin(4);
 }
 
@@ -26,12 +26,10 @@ RingModule::~RingModule()
 }
 
 void RingModule::updateRing(float *freqData, Vec2f center, int wWidth, int wHeight)
-{
-	glDisable(GL_LIGHTING);
+{	
 	perl.setSeed(clock());
 	// Get dimensions
 	float mScale = (wWidth - 20.0f) / (float)dataSiz;
-	float mWindowHeight = wHeight;	
 	//Average for note threshold
 	float avgIntensity = 0;	
 
@@ -41,8 +39,8 @@ void RingModule::updateRing(float *freqData, Vec2f center, int wWidth, int wHeig
 	{
 		// Do logarithmic plotting for frequency domain
 		double mLogSize = log((double)dataSiz);
-		float x = (log((double)i) / mLogSize) * dataSiz;				
-		float y = math<float>::clamp(freqData[i]*(x / dataSiz)*log((double)(dataSiz - i)), 0.0f, 2.0f);		 
+		float x = (float)((log((float)i) / mLogSize) * dataSiz);				
+		float y = math<float>::clamp(freqData[i]*(x / dataSiz)*log((float)(dataSiz - i)), 0.0f, 2.0f);		 
 		//Plot the circle fft visualizaiton
 		//If we want a circle, R should be intensity, and angle is x axis
 		float c = y * 2;
@@ -64,28 +62,18 @@ void RingModule::updateRing(float *freqData, Vec2f center, int wWidth, int wHeig
 			if(currentlyNote[i] != NULL)
 				delete currentlyNote[i]; //Some cleanup
 			currentlyNote[i]= new NoteRay(nRayPos+center,vel,i,&perl,nRayPos-center);
-		}
-		//gl::drawSolidCircle(fcenter,3);
+		}		
 		alternate=!alternate;
 	}		
 	avgIntensity/=dataSiz-SKIP_LOW_F_BINS;
 	lastAverage = avgIntensity;
 	noteThreshold = avgIntensity+avgIntensity/9;
 	
-	//Update noterays
+	//Update noterays	
 	fShader.bind();
 	fShader.uniform("lightpos",Vec3f(center,10.0f));
 	noteRayUpdater(currentlyNote,dataSiz);
 	fShader.unbind();
-	
-	//Draw quad with metaballs
-	/** Currently unused for performance
-	mShader.bind();
-	mShader.uniform("balls", ballArr, NUM_MBALLS);
-	mShader.uniform("lightpos", Vec3f(center,10.0f));
-	gl::drawSolidRect(Rectf(0,0,wWidth,wHeight));	
-	mShader.unbind();
-	*/
 }
 
 void RingModule::noteRayUpdater(NoteRay **rays, int num)

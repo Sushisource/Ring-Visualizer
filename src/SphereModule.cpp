@@ -1,5 +1,5 @@
 #include "SphereModule.h"
-GLfloat mat_emission[]		= { 0.1, 0.2, 0.3, 0.0 };
+GLfloat mat_emission[]		= { 0.1f, 0.2f, 0.3f, 0.0f };
 
 SphereModule::SphereModule(int dataSize, gl::GlslProg sphereShader)
 {
@@ -56,4 +56,8 @@ void SphereModule::updateSphere(float *freqData, Vec2f center, int wWidth, int w
 	shader.unbind();	
 	gl::popMatrices();
 	gl::popMatrices();
+
+	//Now turn off the lighting again
+	glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHT0);
 }
