@@ -13,6 +13,7 @@
 #include "RingModule.h"
 #include "SphereModule.h"
 #define FFT_DATA_SIZ BUFFER_LENGTH
+#define BIN_SIZ 213
 using namespace ci;
 using namespace ci::app;
 

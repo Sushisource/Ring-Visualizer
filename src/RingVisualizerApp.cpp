@@ -39,17 +39,6 @@ unsigned char simplex4[][4] = {{0,64,128,192},{0,64,192,128},{0,0,0,0},
 
 void RingVisualizerApp::setup()
 {
-	/* Old style song load
-	try	{
-		audio::SourceRef trk = audio::load("M:\\Music\\Lily Allen\\It's Not Me, It's You\\08 Lily Allen - Fuck You.mp3","mp3");
-		//audio::SourceRef trk = audio::load("M:\\Windowlicker.mp3","mp3");
-		mTrack = audio::Output::addTrack( trk );	
-	}
-	catch(Exception e)	{
-		printf("Error opening track %s", e.what());
-	}
-	//you must enable enable PCM buffering on the track to be able to call getPcmBuffer on it later
-	mTrack->enablePcmBuffering( true );*/
 	elapsedTime = 0;
 	//Setup the fft
 	kfft.setDataSize(FFT_DATA_SIZ);
@@ -61,16 +50,14 @@ void RingVisualizerApp::setup()
 	//Initalize stereo in
 	mCallbackID = mInput.addCallback<RingVisualizerApp>(&RingVisualizerApp::onData, this);
 	mInput.start();
-	//Get fft bin size and Chop off last 300 bins filled with garbage
-	int binsiz = kfft.getBinSize()-300;
 	//Setup ring module.
 	//Load the shaders
 	gl::GlslProg n = gl::GlslProg(ci::app::loadResource(NOTERAY_V_SHADER),ci::app::loadResource( NOTERAY_SHADER ));	
-	ringM = new RingModule(binsiz,n);
+	ringM = new RingModule(BIN_SIZ,n);
 	//Setup sphere module
 	//Load shader
 	gl::GlslProg ss = gl::GlslProg(ci::app::loadResource(SPHERE_V_SHADER),ci::app::loadResource( SPHERE_SHADER ));
-	sphereM = new SphereModule(binsiz,ss);
+	sphereM = new SphereModule(BIN_SIZ,ss);
 	//Our own BG shader
 	bgsh = gl::GlslProg(ci::app::loadResource(BG_V_SHADER), ci::app::loadResource( BG_SHADER ));
 	initPermTexture();
@@ -104,27 +91,27 @@ void RingVisualizerApp::draw()
 	//Update Ring module
 	ringM->updateRing(mFreqData,winCenter,w,h);
 	//Draw the background
-	bgsh.bind();
-	//Update our animation track
-	elapsedTime += .01f;
-	bgsh.uniform("time", elapsedTime);
+	bgsh.bind();	
 	bgsh.uniform("permTexture",0); //tex unit 0
 	bgsh.uniform("simplexTexture",1); //tex unit 1
 	bgsh.uniform("wCenter",getWindowCenter());
 	//Calculate a weighted mean of the spectrogram
+	double lsum = 0;
+	double hsum = 0;
 	double sum = 0;
-	double wSum = 0;
-	for(int i = 0; i<FFT_DATA_SIZ; i++)
+	for(int i = 0; i<BIN_SIZ; i++)
 	{
-		if(mFreqData[i] > 0)
-		{
-			sum += i*(mFreqData[i]);		
-			wSum += mFreqData[i];
-		}
+		sum += mFreqData[i];
+		if (i < BIN_SIZ/3)
+			lsum += mFreqData[i];
+		else
+			hsum += mFreqData[i];
 	}
-	sum /= wSum;
-	sum /= 213; //Now b/w 0 and 1. Mix occurs in GLSL
-	bgsh.uniform("freqBal",(float)sum);
+	//Update our animation track
+	elapsedTime += (hsum/lsum)/2000;
+	bgsh.uniform("time", elapsedTime);
+	bgsh.uniform("lowAmp",(float)lsum);
+	bgsh.uniform("hiAmp",(float)hsum);
 	gl::drawSolidRect(Rectf(0,0,w,h),true);
 	bgsh.unbind();
 }
@@ -165,49 +152,6 @@ void RingVisualizerApp::initPermTexture()
 	//glActiveTexture(GL_TEXTURE0); // Switch active texture unit back to 0 again
 }
 
-/* Currently removed -- used as part of the
-old style song load method
-void RingVisualizerApp::updateAudio()
-{
-	// Check if track is playing and has a PCM buffer available
-	if (mTrack->isPlaying() && mTrack->isPcmBuffering())
-	{
-		// Get new buffer
-		mPcmBuffer = mTrack->getPcmBuffer();
-		if (mPcmBuffer && mPcmBuffer->getInterleavedData())
-		{
-			// Get sample count
-			uint32_t mSampleCount = mPcmBuffer->getInterleavedData()->mSampleCount;			
-			// Now we want to make our doublebuffer out of this frame and last frame's data
-			// so we'll just copy the arrays next to each other
-			float* newData = mPcmBuffer->getInterleavedData()->mData;						
-			float* tBuf = new float[mSampleCount*2];
-			memcpy(tBuf,newData,sizeof(float) * mSampleCount);
-			
-			if(lastBuffer)
-			{
-				float *oldData = lastBuffer->getInterleavedData()->mData;
-				memcpy(tBuf+mSampleCount,oldData,sizeof(float) * mSampleCount);				
-			}
-		
-			if (mSampleCount > 0)
-			{
-				// Initialize analyzer, if needed
-				if (!fftinit)
-				{
-					fftinit = true;
-					kfft.setDataSize(mSampleCount*2);
-				}
-				// Analyze data				
-				if (mPcmBuffer->getInterleavedData()->mData != NULL)
-					kfft.setData(tBuf);
-			}
-			delete tBuf;			
-		}
-		lastBuffer = mPcmBuffer;
-	}
-}
-*/
 RingVisualizerApp::RingVisualizerApp(){}
 
 CINDER_APP_BASIC( RingVisualizerApp, RendererGl )

@@ -5,7 +5,7 @@
 #define ONE 0.00390625 //Texel offsets
 #define ONEHALF 0.001953125
 //Frequency information
-uniform float freqBal;
+uniform float lowAmp, hiAmp;
 uniform float time; // Used for texture animation
 uniform vec2 wCenter; //Window center
 //Simplex noise texture
@@ -97,12 +97,12 @@ float snoise(vec3 P) {
 
 void main()
 {
-    //First fix the freqbalance
-    float fB = mix(10.0f,9.0f,freqBal);
-    float rC = freqBal;
-    float bC = 1.0 - freqBal;
-    vec3 ccolor = vec3(rC,.2,bC);
-    vec3 noiseV = vec3((gl_FragCoord.xy)/fB, time);
+    float rC = clamp(hiAmp,0.0,1.0);
+    float bC = -clamp(lowAmp,0.0,1.0);
+    float power = mix(1.0f,1.2f,rC+bC)*15;
+    float gC = sin(time*10);
+    vec3 ccolor = vec3(rC,gC,bC);
+    vec3 noiseV = vec3((wCenter - gl_FragCoord.xy)/power + vec2(50,50), time);
     vec3 fcolor = ccolor*snoise(noiseV);
     gl_FragColor = vec4(fcolor,1);
 }
