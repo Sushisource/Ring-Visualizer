@@ -1,4 +1,5 @@
 #version 120
+#extension GL_EXT_gpu_shader4 : enable
 #define BIN_SIZE 213 //213 Is just what it is.
 #define PI 3.14159265358979323846264
 
@@ -37,15 +38,37 @@ void audioDistort(inout spherical sPoint) {
     sPoint.r += clamp(200*(0.01+clamp(regionAvg*(x/BIN_SIZE)*log(float(BIN_SIZE-fauxIndex)), 0.0f, 2.0f)),0,100);
 }
 
+vec4 thetaToRGB(float h, float s, float v)
+{
+	int i;
+	i = int(floor(h));
+	float f = h - i;
+	if ( !bool(i&1) ) f = 1 - f; // if i is even
+	float m = v * (1 - s);
+	float n = v * (1 - s * f);
+	switch (i) {
+		case 6:
+		case 0: return(vec4(v, n, m,v));
+		case 1: return(vec4(n, v, m,v));
+		case 2: return(vec4(m, v, n,v));
+		case 3: return(vec4(m, n, v,v));
+		case 4: return(vec4(n, m, v,v));
+		case 5: return(vec4(v, m, n,v));
+	} 
+}
+
 void main()
 {	
-    spherical sphereCoords = cartesianToSpherical(gl_Vertex.xyz);
+    spherical sphC = cartesianToSpherical(gl_Vertex.xyz);
     //Audio distortion
-    audioDistort(sphereCoords);
-    //More Nice shading
-    colorMod = vec4(vec3(.1,.1,.1)*log(sphereCoords.r*4),1);
+    audioDistort(sphC);
     //convert modified spherical coordindates back to cartesian
-    vec3 outCoords = sphericalToCartesian(sphereCoords);
+    vec3 outCoords = sphericalToCartesian(sphC);
+    //More Nice shading
+    mat3 rot = mat3(cos(sphC.r), -sin(sphC.r), -cos(sphC.r),
+                    sin(sphC.r), cos(sphC.r), sin(sphC.r),
+                    0,0,1);
+    colorMod = thetaToRGB(mix(0,4,sphC.r/274),1.0,0.8);
     gl_Position = gl_ModelViewProjectionMatrix* vec4(outCoords, 1.0);
     //Perform lighting calculations
     normal = normalize(gl_NormalMatrix * gl_Normal);

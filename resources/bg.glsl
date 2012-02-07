@@ -100,9 +100,9 @@ void main()
     float rC = clamp(hiAmp,0.0,1.0);
     float bC = -clamp(lowAmp,0.0,1.0);
     float power = mix(1.0f,1.2f,rC+bC)*15;
-    float gC = sin(time*10);
+    float gC = sin(power);
     vec3 ccolor = vec3(rC,gC,bC);
-    vec3 noiseV = vec3((wCenter - gl_FragCoord.xy)/power + vec2(50,50), time);
+    vec3 noiseV = vec3((wCenter - gl_FragCoord.xy)/power + vec2(80,80), time);
     vec3 fcolor = ccolor*snoise(noiseV);
     gl_FragColor = vec4(fcolor,1);
 }

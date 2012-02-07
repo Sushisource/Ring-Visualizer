@@ -52,7 +52,7 @@ void SphereModule::updateSphere(float *freqData, Vec2f center, int wWidth, int w
 	shader.uniform("freqData",freqData,dataSiz);
 	float chAvs[2] = {1,1};
 	shader.uniform("channelAvgs",chAvs,2);
-	gl::drawSphere(Vec3f::zero(),174,124);	
+	gl::drawSphere(Vec3f::zero(),174,480);	
 	shader.unbind();	
 	gl::popMatrices();
 	gl::popMatrices();

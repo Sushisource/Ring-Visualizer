@@ -14,16 +14,19 @@
     <ProjectGuid>{74202EDD-91D2-4D2A-B0B6-355CEB16E6BE}</ProjectGuid>
     <RootNamespace>RingVisualizerApp</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and $(VisualStudioVersion) == ''">$(VCTargetsPath11)</VCTargetsPath>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -43,6 +46,14 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:\libs\cinder\cinder_master\blocks\audioInputWin\src;E:\libs\cinder\cinder_master\boost;E:\libs\cinder\cinder_master\include;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:\libs\cinder\cinder_master\blocks\audioInputWin\src;E:\libs\cinder\cinder_master\boost;E:\libs\cinder\cinder_master\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:\libs\cinder\cinder_master\lib\msw;E:\libs\cinder\cinder_master\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:\libs\cinder\cinder_master\lib\msw;E:\libs\cinder\cinder_master\lib;$(LibraryPath)</LibraryPath>
+    <SourcePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(VCInstallDir)atlmfc\src\mfc;$(VCInstallDir)atlmfc\src\mfcm;$(VCInstallDir)atlmfc\src\atl;$(VCInstallDir)crt\src;</SourcePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -66,8 +77,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -84,6 +94,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -101,23 +112,24 @@
       <EnableCOMDATFolding>
       </EnableCOMDATFolding>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\kiss\kiss_fft.c" />
+    <ClCompile Include="..\include\kiss\kiss_fftr.c" />
+    <ClCompile Include="..\src\KissFFT.cpp" />
     <ClCompile Include="..\src\NoteRay.cpp" />
     <ClCompile Include="..\src\RingModule.cpp" />
     <ClCompile Include="..\src\RingVisualizerApp.cpp" />
     <ClCompile Include="..\src\SphereModule.cpp" />
-    <ClCompile Include="E:\libs\cinder_0.8.2_vc2010\blocks\kiss\include\kiss\kiss_fft.c" />
-    <ClCompile Include="E:\libs\cinder_0.8.2_vc2010\blocks\kiss\include\kiss\kiss_fftr.c" />
-    <ClCompile Include="E:\libs\cinder_0.8.2_vc2010\blocks\kiss\src\Kiss.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\AudioInput.h" />
     <ClInclude Include="..\include\CommonDefinitions.h" />
+    <ClInclude Include="..\include\kiss\kiss_fft.h" />
+    <ClInclude Include="..\include\kiss\kiss_fftr.h" />
+    <ClInclude Include="..\include\kiss\_kiss_fft_guts.h" />
     <ClInclude Include="..\include\NoteRay.h" />
     <ClInclude Include="..\include\Resources.h" />
     <ClInclude Include="..\include\RingModule.h" />

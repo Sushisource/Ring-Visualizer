@@ -41,7 +41,7 @@ void RingVisualizerApp::setup()
 {
 	elapsedTime = 0;
 	//Setup the fft
-	kfft.setDataSize(FFT_DATA_SIZ);
+	kfft = Kiss::create(FFT_DATA_SIZ);
 	//Turn on some opengl stuff
 	gl::enableAlphaBlending();
 	gl::enableDepthWrite();
@@ -49,7 +49,7 @@ void RingVisualizerApp::setup()
 	glClearColor( 0, 0, 0, 1 );
 	//Initalize stereo in
 	mCallbackID = mInput.addCallback<RingVisualizerApp>(&RingVisualizerApp::onData, this);
-	mInput.start();
+	mInput.start();	
 	//Setup ring module.
 	//Load the shaders
 	gl::GlslProg n = gl::GlslProg(ci::app::loadResource(NOTERAY_V_SHADER),ci::app::loadResource( NOTERAY_SHADER ));	
@@ -119,16 +119,21 @@ void RingVisualizerApp::draw()
 // Called when audio in buffer is full
 void RingVisualizerApp::onData(float * data, int32_t size)
 {
+	for(int i=0; i < size; i++)
+	{
+		//TODO: Parameterize volume
+		data[i] = data[i]*40;
+	}
 	// Analyze data
-	kfft.setData(data);
-	mFreqData = kfft.getAmplitude();
+	kfft->setData(data);
+	mFreqData = kfft->getAmplitude();	
 }
 
 //Loads up the textures that the background
 //shader needs for simplex noise
 void RingVisualizerApp::initPermTexture()
 {	
-	unsigned char pixels[256*256*4];
+	unsigned char* pixels = new unsigned char[256*256*4];
 	for(int i = 0; i<256; i++)
 		for(int j = 0; j<256; j++) 
 		{
@@ -150,6 +155,7 @@ void RingVisualizerApp::initPermTexture()
 	glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 	//glActiveTexture(GL_TEXTURE0); // Switch active texture unit back to 0 again
+	delete[] pixels;
 }
 
 RingVisualizerApp::RingVisualizerApp(){}

@@ -7,7 +7,7 @@ varying float d[2];
 
 void main (void)
 {
-	vec4 final_color = ambientGlobal * colorMod;
+	vec4 final_color = ambientGlobal;
 	vec3 N = normalize(normal);
     int i;
     for (i=0; i<2; i++)
@@ -37,6 +37,6 @@ void main (void)
         }
     }
     //This divisior is a poor immitation at AO but works okay for this case
-	gl_FragColor = final_color/(gl_FragCoord.z*10-8);
+	gl_FragColor = final_color/(gl_FragCoord.z*10-8) * colorMod;
 }
 

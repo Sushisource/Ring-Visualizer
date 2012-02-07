@@ -8,7 +8,7 @@
 #include "cinder/audio/PcmBuffer.h"
 #include "cinder/Perlin.h"
 #include "cinder/gl/Texture.h"
-#include "Kiss.h"
+#include "KissFFT.h"
 #include "AudioInput.h"
 #include "RingModule.h"
 #include "SphereModule.h"
@@ -37,7 +37,7 @@ class RingVisualizerApp : public AppBasic {
 	//fft
 	bool fftinit;
 	float * mFreqData;
-	Kiss kfft;	
+	KissRef kfft;	
 	gl::GlslProg bgsh; //Background shader
 	gl::Texture permTexture; //Texture array for permutation table
 	gl::Texture simplexTexture; //Texture array for 3d simplex noise
